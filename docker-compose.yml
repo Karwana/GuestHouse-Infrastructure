@@ -1,0 +1,88 @@
+services:
+
+  booking-db:
+    image: mysql:8.0
+    container_name: booking-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: guesthousebooking
+    ports:
+      - "3307:3306"
+    volumes:
+      - booking-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  customer-db:
+    image: mysql:8.0
+    container_name: customer-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: customerservice
+    ports:
+      - "3308:3306"
+    volumes:
+      - customer-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  review-db:
+    image: mysql:8.0
+    container_name: review-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: reviewservice
+    ports:
+      - "3309:3306"
+    volumes:
+      - review-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  customer-service:
+    build:
+      context: ../GuestHouse-Customer-Service
+    container_name: customer-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      customer-db:
+        condition: service_healthy
+
+  booking-service:
+    build:
+      context: ../GuestHouse-Booking-System
+    container_name: booking-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      booking-db:
+        condition: service_healthy
+      customer-service:
+        condition: service_started
+
+  review-service:
+    build:
+      context: ../GuestHouse-Review-Service
+    container_name: review-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      review-db:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+
+volumes:
+  booking-db-data:
+  customer-db-data:
+  review-db-data:
