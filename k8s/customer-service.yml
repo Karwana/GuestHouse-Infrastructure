@@ -33,8 +33,8 @@ spec:
             httpGet:
               path: /api/customers
               port: 8081
-            initialDelaySeconds: 40
-            periodSeconds: 10
+            initialDelaySeconds: 5
+            periodSeconds: 3
             failureThreshold: 10
 ---
 apiVersion: v1
